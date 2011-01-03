@@ -6,16 +6,16 @@ This plugin will convert your complete Rails project from Gettext calls to the n
 
 Example
 =======
-	<%=_("Some string that will be translated, into %{lan}" % {:lan => 'english'}) %>
+  <%=_("Some string that will be translated, into %{lan}" % {:lan => 'english'}) %>
 
 will be converted into:
 
-	<%=t(:message_0, :lan => 'english', :scope => [:controller, :controller_name]) %>
+  <%=t(:message_0, :lan => 'english', :scope => [:controller, :controller_name]) %>
 
 it will then place a entry:
-	
-	"Some string that will be translated, into {{lan}}"
-	
+  
+  "Some string that will be translated, into {{lan}}"
+  
 in the standard.yml locale file it generates.
 
 
@@ -23,17 +23,17 @@ About namespaces
 ========
 By default the plugin walks all files in the app directory. It places the message id's into namespaces. The namespace are divided like this: 
 
-	Controllers: translation[:txt][:controller][:controller_name]
-	Views: translation[:txt][:view][:view_colleciton_name]
-	-> etc.
-	
-	
+  Controllers: translation[:txt][:controller][:controller_name]
+  Views: translation[:txt][:view][:view_colleciton_name]
+  -> etc.
+  
+  
 
 Usage
 =======
 To convert all your views, controllers and models to the new format.
 
-	rake gettext_to_i18n:transform
+  rake gettext_to_i18n:transform
 
 
 Installation

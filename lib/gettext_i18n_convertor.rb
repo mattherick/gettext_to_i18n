@@ -4,9 +4,10 @@ module GettextToI18n
     
     GETTEXT_VARIABLES = /\%\{(\w+)\}*/
     
-    def initialize(text, namespace = nil)
+    def initialize(text, namespaces, type = 'views')
       @text = text
-      @namespace = namespace
+      @namespaces = namespaces
+      @type = type
     end
     
     # The contents of the method call
@@ -30,16 +31,14 @@ module GettextToI18n
       c = contents
       unless c.nil?
         c.gsub!(GETTEXT_VARIABLES, '{{\1}}')
+        c.gsub!(GETTEXT_VARIABLES, '%{\1}') # new
         c.gsub!(/^(\"|\')/, '')
         c.gsub!(/(\"|\')$/, '')
       else
         puts "No content: " + @text
-        
       end
       c
     end
-    
-
     
     # Returns the part after the method call, 
     # _('aaa' % :a => 'sdf', :b => 'agh') 
@@ -86,7 +85,7 @@ module GettextToI18n
         return nil if vsplitted.nil?
         vsplitted.map! { |v| 
           r = v.match(/\s*:(\w+)\s*=>\s*(.*)/)
-          {:name => r[1], :value => GettextI18nConvertor.string_to_i18n(r[2], @namespace)}
+          {:name => r[1], :value => GettextI18nConvertor.string_to_i18n(r[2], @namespaces, @type)}
         }
       end
     end
@@ -94,24 +93,29 @@ module GettextToI18n
     # After analyzing the variable part, the variables
     # it is now time to construct the actual i18n call
     def to_i18n
-      id = @namespace.consume_id!
-      @namespace.set_id(id, contents_i18n)
-      output = "t(:#{id}"
+      id = ''
+      @namespaces.each do |ns|
+        id = ns.consume_id!(GettextI18nConvertor.create_key(contents_i18n))
+        ns.set_id(id, contents_i18n)
+      end
+      if @type == 'views'
+        output = "t('.#{id}'"
+      else
+        output = "I18n.t('#{@namespaces.first.to_i18n_scope + id}'"
+      end
       if !self.variables.nil?
           vars = self.variables.collect { |h| {:name => h[:name], :value => h[:value] }}
           output += ", " + vars.collect {|h| ":#{h[:name]} => #{h[:value]}"}.join(", ")
       end
-      output += ", " + @namespace.to_i18n_scope
       output += ")"
       return output
     end
     
     # Takes the gettext calls out of a string and converts
     # them to i18n calls
-    def self.string_to_i18n(text, namespace)
+    def self.string_to_i18n(text, namespaces, type)
       s = self.indexes_of(text, /_\(/)
       e = self.indexes_of(text, /\)/)
-      r = self.indexes_of(text, /\(/)
       
       indent, indent_all,startindex, endinde, methods  = 0, 0, -1, -1, []
       
@@ -119,6 +123,7 @@ module GettextToI18n
       level = 0
       gettext_blocks = []
       text.length.times do |i|
+
         token = text[i..i]
        
         in_gettext_block = gettext_blocks.size % 2 == 1
@@ -144,7 +149,7 @@ module GettextToI18n
         e = gettext_blocks[i * 2 + 1]
         to_convert = text[s..e]
        
-        converted_block = GettextI18nConvertor.new(to_convert, namespace).to_i18n
+        converted_block = GettextI18nConvertor.new(to_convert, namespaces, type).to_i18n
         g = output.index(to_convert) - 1
         
         h = g + (e-s) + 2
@@ -152,14 +157,25 @@ module GettextToI18n
       end
       output
     end
-    
-    
-   
-     
-    
+
+    def self.create_key(s, max_words = 3)
+      s = 'message' if s.nil?
+      # all down
+      s.downcase!
+      
+      # max words 
+      words = s.split(/\s/) 
+      if words.size >= max_words
+        s = words[0..(max_words-1)].join("_")
+      else
+        s = words.join("_")
+      end
+      
+      # preserve alphanumerics, everything else becomes a separator
+      s.gsub(/[^a-z0-9_]/, '')
+    end
     
     private 
-    
     # Finds indexes of some pattern(regexp) in a string
     def self.indexes_of(str, pattern)
       indexes = []
@@ -169,6 +185,6 @@ module GettextToI18n
       end
       indexes
     end
-    
+ 
   end
 end
