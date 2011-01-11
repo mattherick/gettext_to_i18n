@@ -7,7 +7,7 @@ module GettextToI18n
       self.controller_files + self.view_files + self.helper_files + self.model_files + self.mailer_files + self.lib_files
     end
     
-    # All files with specific type
+    # all files with specific type
     def self.type_files(type)
       case type
         when 'controllers'
@@ -25,42 +25,43 @@ module GettextToI18n
       end
     end
     
-    # All controller files
+    # all controller files
     def self.controller_files
       self.get_files('app/controllers', '*.rb') + self.get_files('app/controllers', '**/*.rb')
     end
     
-    # All view files
+    # all view files
     def self.view_files
       self.get_files('app/views', '**/*.{erb,builder,haml}')
     end
     
-    # All lib files
+    # all lib files
     def self.lib_files
       self.get_files('lib', '*.rb')
     end
     
-    # All helper files
+    # all helper files
     def self.helper_files
       self.get_files('app/helpers', '*.rb') + self.get_files('app/helpers', '**/*.rb')
     end
     
-    # All model files
+    # all model files
     def self.model_files
       self.get_files('app/models', '*.rb') + self.get_files('app/models', '**/*.rb')
     end
     
-    # All mailer files
+    # all mailer files
     def self.mailer_files
       self.get_files('app/mailers', '*.rb') + self.get_files('app/mailers', '**/*.{erb,haml}')
     end    
     
-    private   
+    private
+    
     def self.chdir
       Dir.chdir(RAILS_ROOT)
     end
 
-    # All files we need to walk
+    # all files needed to walk
     def self.get_files(filter = '**', types='*.{erb,rb,haml}')
       self.chdir
       Dir.glob("#{filter}/#{types}")
