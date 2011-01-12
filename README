@@ -1,46 +1,75 @@
 GettextToI18n
 =============
 
-This plugin will convert your complete Rails project from Gettext calls to the new i18n api calls introduced in Rails 2.2.2. NB: This plugin is higly experimental, so before running, BACKUP YOUR CODE. It will touch your code and things always can go wrong!
-
+This plugin will convert your complete Rails project from Gettext calls to the new i18n api calls introduced in Rails 2.2.2. 
+Please Backup your Code before running this plugin. It will touch your code and things could always go wrong.
 
 Example
 =======
-  <%=_("Some string that will be translated, into %{lan}" % {:lan => 'english'}) %>
+
+CONTROLLERS:
+Following code is placed in apps/controllers/articles_controller.rb
+
+def foo
+  flash[:notice] = _("Some string that will be translated")
+  render :foo
+end
+
+this will be converted into:
+
+def foo
+  flash[:notice] = I18n.t("controllers.articles.some_string_that0")
+  render :foo
+end
+
+it will place an entry into config/locales/controllers/articles_controller/en.yml
+
+en: 
+  controllers: 
+    articles_controller:
+      some_string_that0: "Some string that will be translated, into %{lan}}"
+      
+The same way this plugin works with Models, Helpers, Mailers and files in lib.
+
+With the views it works a little bit different.       
+
+VIEWS:
+Following string is placed in apps/views/articles/index.html.haml
+
+  <%=_("Another string that will be translated, into %{lan}", % {:lan => 'english'}) %>
 
 will be converted into:
 
-  <%=t(:message_0, :lan => 'english', :scope => [:controller, :controller_name]) %>
+  <%=t(:another_string_that0, :lan => 'english' %>
 
-it will then place a entry:
-  
-  "Some string that will be translated, into {{lan}}"
-  
-in the standard.yml locale file it generates.
+it will place an entry into config/locales/views/articles/en.yml
 
+en:
+  articles:
+    index:
+      another_string_that0: "Another string that will be translated, into %{lan}}"
 
-About namespaces
-========
-By default the plugin walks all files in the app directory. It places the message id's into namespaces. The namespace are divided like this: 
+It will follow the lazy lookup standard.
 
-  Controllers: translation[:txt][:controller][:controller_name]
-  Views: translation[:txt][:view][:view_colleciton_name]
-  -> etc.
-  
-  
+If a yml-file already exists, it will merge the existing entries with the new entries, without deleting stuff.
+
+This plugin does not cover an automatically translation from model attributes and error messages yet. But it should help you to migrate from gettext to I18n.
 
 Usage
 =======
-To convert all your views, controllers and models to the new format.
+To convert all your views, controllers, models, mailers, helper and lib files to the new format.
 
   rake gettext_to_i18n:transform
 
+But you can also uncomment a few types in the plugin code (base.rb), and just convert the views in the first step. 
+Further you can configure the languages the way you like it. You can translate for example just from English to German, or ten languages in one step.
 
 Installation
 =======
-./script/plugin install git://github.com/japetheape/gettext_to_i18n.git
-
+./script/plugin install github.com/mattherick/gettext_to_i18n/
 
 
 -------------
-Copyright (c) 2008 Jaap van der Meer, released under the MIT license
+
+This is a fork from Jaap van der Meer (http://github.com/japetheape/gettext_to_i18n)
+Copyright (c) 2010 Matthias Frick, released under the MIT license
