@@ -53,7 +53,13 @@ module GettextToI18n
     # all mailer files
     def self.mailer_files
       self.get_files('app/mailers', '*.rb') + self.get_files('app/mailers', '**/*.{erb,haml}')
-    end    
+    end 
+    
+    # all files needed to walk
+    def self.get_files(filter = '**', types='*.{erb,rb,haml}')
+      self.chdir
+      Dir.glob("#{filter}/#{types}")
+    end
     
     private
     
@@ -61,10 +67,6 @@ module GettextToI18n
       Dir.chdir(RAILS_ROOT)
     end
 
-    # all files needed to walk
-    def self.get_files(filter = '**', types='*.{erb,rb,haml}')
-      self.chdir
-      Dir.glob("#{filter}/#{types}")
-    end
+
   end
 end
