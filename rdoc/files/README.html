@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>File: README</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <meta http-equiv="Content-Script-Type" content="text/javascript" />
+  <link rel="stylesheet" href=".././rdoc-style.css" type="text/css" media="screen" />
+  <script type="text/javascript">
+  // <![CDATA[
+
+  function popupCode( url ) {
+    window.open(url, "Code", "resizable=yes,scrollbars=yes,toolbar=no,status=no,height=150,width=400")
+  }
+
+  function toggleCode( id ) {
+    if ( document.getElementById )
+      elem = document.getElementById( id );
+    else if ( document.all )
+      elem = eval( "document.all." + id );
+    else
+      return false;
+
+    elemStyle = elem.style;
+    
+    if ( elemStyle.display != "block" ) {
+      elemStyle.display = "block"
+    } else {
+      elemStyle.display = "none"
+    }
+
+    return true;
+  }
+  
+  // Make codeblocks hidden by default
+  document.writeln( "<style type=\"text/css\">div.method-source-code { display: none }</style>" )
+  
+  // ]]>
+  </script>
+
+</head>
+<body>
+
+
+
+  <div id="fileHeader">
+    <h1>README</h1>
+    <table class="header-table">
+    <tr class="top-aligned-row">
+      <td><strong>Path:</strong></td>
+      <td>README
+      </td>
+    </tr>
+    <tr class="top-aligned-row">
+      <td><strong>Last Update:</strong></td>
+      <td>Wed Jan 12 06:51:34 +0100 2011</td>
+    </tr>
+    </table>
+  </div>
+  <!-- banner header -->
+
+  <div id="bodyContent">
+
+
+
+  <div id="contextContent">
+
+    <div id="description">
+      <p>
+<a href="../classes/GettextToI18n.html">GettextToI18n</a>
+</p>
+<h6>=======</h6>
+<p>
+This plugin will convert your complete Rails project from Gettext calls to
+the new i18n api calls introduced in Rails 2.2.2. Please Backup your Code
+before running this plugin. It will touch your code and things could always
+go wrong.
+</p>
+<p>
+Example
+</p>
+<h6>=</h6>
+<p>
+CONTROLLERS: Following code is placed in
+apps/controllers/articles_controller.rb
+</p>
+<p>
+def foo
+</p>
+<pre>
+  flash[:notice] = _(&quot;Some string that will be translated&quot;)
+  render :foo
+</pre>
+<p>
+end
+</p>
+<p>
+this will be converted into:
+</p>
+<p>
+def foo
+</p>
+<pre>
+  flash[:notice] = I18n.t(&quot;controllers.articles.some_string_that0&quot;)
+  render :foo
+</pre>
+<p>
+end
+</p>
+<p>
+it will place an entry into
+config/locales/controllers/articles_controller/en.yml
+</p>
+<p>
+en:
+</p>
+<pre>
+  controllers:
+    articles_controller:
+      some_string_that0: &quot;Some string that will be translated, into %{lan}}&quot;
+</pre>
+<p>
+The same way this plugin works with Models, Helpers, Mailers and files in
+lib.
+</p>
+<p>
+With the views it works a little bit different.
+</p>
+<p>
+VIEWS: Following string is placed in apps/views/articles/index.html.haml
+</p>
+<pre>
+  &lt;%=_(&quot;Another string that will be translated, into %{lan}&quot;, % {:lan =&gt; 'english'}) %&gt;
+</pre>
+<p>
+will be converted into:
+</p>
+<pre>
+  &lt;%=t(:another_string_that0, :lan =&gt; 'english' %&gt;
+</pre>
+<p>
+it will place an entry into config/locales/views/articles/en.yml
+</p>
+<p>
+en:
+</p>
+<pre>
+  articles:
+    index:
+      another_string_that0: &quot;Another string that will be translated, into %{lan}}&quot;
+</pre>
+<p>
+It will follow the lazy lookup standard.
+</p>
+<p>
+If a yml-file already exists, it will merge the existing entries with the
+new entries, without deleting stuff.
+</p>
+<p>
+This plugin does not cover an automatically translation from model
+attributes and error messages yet. But it should help you to migrate from
+gettext to I18n.
+</p>
+<p>
+Usage
+</p>
+<h6>=</h6>
+<p>
+To convert all your views, controllers, models, mailers, helper and lib
+files to the new format.
+</p>
+<pre>
+  rake gettext_to_i18n:transform
+</pre>
+<p>
+But you can also uncomment a few types in the plugin code (base.rb), and
+just convert the views in the first step. Further you can configure the
+languages the way you like it. You can translate for example just from
+English to German, or ten languages in one step.
+</p>
+<p>
+Installation
+</p>
+<h6>=</h6>
+<p>
+./script/plugin install github.com/mattherick/gettext_to_i18n/
+</p>
+
+    </div>
+
+
+   </div>
+
+
+  </div>
+
+
+    <!-- if includes -->
+
+    <div id="section">
+
+
+
+
+
+      
+
+
+    <!-- if method_list -->
+
+
+  </div>
+
+
+<div id="validator-badges">
+  <p><small><a href="http://validator.w3.org/check/referer">[Validate]</a></small></p>
+</div>
+
+</body>
+</html>
