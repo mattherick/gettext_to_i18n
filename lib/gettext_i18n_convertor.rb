@@ -1,9 +1,12 @@
 module GettextToI18n
   class GettextI18nConvertor
+    
     attr_accessor :text
     
     GETTEXT_VARIABLES = /\%\{(\w+)\}*/
     
+    # initializer
+    # text, namespace and default type "views" as parameter
     def initialize(text, namespaces, type = 'views')
       @text = text
       @namespaces = namespaces
@@ -12,9 +15,6 @@ module GettextToI18n
     
     # The contents of the method call
     def contents
-      #if result = /\_\([\"\']?([^\'\"]*)[\"\']?.*\)/.match(@text)
-      
-      #if result = /\_\(([\']?([^\']*)[\'])|([\"]?([^\"]*)[\"])?.*\)/.match(@text)
       single_quotes = /\_\(\'([^']*)\'.*\)/.match(@text)
       double_quotes = /\_\(\"([^"]*)\".*\)/.match(@text)
       
@@ -40,7 +40,7 @@ module GettextToI18n
       c
     end
     
-    # Returns the part after the method call, 
+    # returns the part after the method call, 
     # _('aaa' % :a => 'sdf', :b => 'agh') 
     # return :a => 'sdf', :b => 'agh'
     def variable_part
@@ -52,10 +52,10 @@ module GettextToI18n
       end
     end
     
-    # Extract the variables out of a gettext variable part
-    # We cannot simply split the variable part on a comma, because it
+    # extract the variables out of a gettext variable part
+    # we cannot simply split the variable part on a comma, because it
     # can contain gettext calls itself.
-    # Example: :a => 'a', :b => 'b' => [":a => 'a'", ":b => 'b'"]
+    # example: :a => 'a', :b => 'b' => [":a => 'a'", ":b => 'b'"]
     def get_variables_splitted
       return if variable_part.nil? 
       in_double_quote = in_single_quote = false
@@ -77,7 +77,7 @@ module GettextToI18n
       return vars
     end
     
-    # Return a array of hashes containing the variables used in the
+    # return an array of hashes containing the variables used in the
     # gettext call.
     def variables
       @variables_cached ||= begin
@@ -90,7 +90,7 @@ module GettextToI18n
       end
     end
     
-    # After analyzing the variable part, the variables
+    # after analyzing the variable part, the variables
     # it is now time to construct the actual i18n call
     def to_i18n
       id = ''
@@ -98,20 +98,31 @@ module GettextToI18n
         id = ns.consume_id!(GettextI18nConvertor.create_key(contents_i18n))
         ns.set_id(id, contents_i18n)
       end
+      
+      # for later on to call with standard t(".key")
+      # for lazy lookup in views
+      # example: "t.("hello") --> could be in /app/views/articles/index.html.haml
       if @type == 'views'
         output = "t('.#{id}'"
+      
+      # for later on to call with namespace as part of
+      # key, because lazy lookup does not work in controllers
+      # models or helpers
+      # example: "I18n.t("controllers.controllername.key1")
       else
         output = "I18n.t('#{@namespaces.first.to_i18n_scope + id}'"
       end
+      
       if !self.variables.nil?
           vars = self.variables.collect { |h| {:name => h[:name], :value => h[:value] }}
           output += ", " + vars.collect {|h| ":#{h[:name]} => #{h[:value]}"}.join(", ")
       end
+      
       output += ")"
       return output
     end
     
-    # Takes the gettext calls out of a string and converts
+    # takes the gettext calls out of a string and converts
     # them to i18n calls
     def self.string_to_i18n(text, namespaces, type)
       s = self.indexes_of(text, /_\(/)
@@ -157,7 +168,10 @@ module GettextToI18n
       end
       output
     end
-
+    
+    # create a key name for a new one
+    # example content is nil => key = message
+    # example content is not nil => key = first_three_words
     def self.create_key(s, max_words = 3)
       s = 'message' if s.nil?
       # all down
@@ -176,7 +190,8 @@ module GettextToI18n
     end
     
     private 
-    # Finds indexes of some pattern(regexp) in a string
+    
+    # finds indexes of some pattern(regexp) in a string
     def self.indexes_of(str, pattern)
       indexes = []
       str.length.times do |i|
@@ -185,6 +200,6 @@ module GettextToI18n
       end
       indexes
     end
- 
+    
   end
 end
