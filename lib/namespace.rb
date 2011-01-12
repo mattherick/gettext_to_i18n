@@ -3,6 +3,8 @@ module GettextToI18n
     attr_reader :ids
     attr_reader :locale
     
+    # initializer
+    # name, locale as parameter
     def initialize(name,locale)
       @ids = {}
       @namespace = name
