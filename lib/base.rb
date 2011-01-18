@@ -50,6 +50,7 @@ module GettextToI18n
     end
     
     def new_file_handler(ns)
+			@yaml = {}
       
       # load old files if they exist
       filepath = create_filepath(ns.locale)
